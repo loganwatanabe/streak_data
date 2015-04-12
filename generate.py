@@ -63,19 +63,22 @@ def getMatchups(date, writer=None):
 		else:
 			ob.result2 = float(result2)
 
-		ob.team1 = row1.find("td", class_="opponents").get_text().replace(",", "")
-		ob.team2 = row2.find("td", class_="opponents").get_text().replace(",", "")
-
-
-		winner1 = 1
-		winner2 = 1
-		if row1.find("span", class_="winner").img == None:
-			winner1 = 0
-		if row2.find("span", class_="winner").img == None:
-			winner2 = 0
+		winner1 = 0
+		winner2 = 0
+		if row1.find("span", class_="winner").img != None:
+			winner1 = 1
+		if row2.find("span", class_="winner").img != None:
+			winner2 = 1
+		row1.find("span", class_="winner").extract()
+		row2.find("span", class_="winner").extract()
 
 		ob.winner1 = winner1
 		ob.winner2 = winner2
+
+
+		ob.team1 = row1.find("td", class_="opponents").get_text().replace(",", "")
+		ob.team2 = row2.find("td", class_="opponents").get_text().replace(",", "")
+
 
 		ob.percent1 = float(row1.find("td", class_="wpw").get_text().replace("%", ""))
 		ob.percent2 = float(row2.find("td", class_="wpw").get_text().replace("%", ""))
@@ -112,7 +115,7 @@ for i in iterdates:
 
 
 # import csv
-# with open('matchups', 'w', newline='') as f:
+# with open('matchups.csv', 'w', newline='') as f:
 # 	writer = csv.writer(f, delimiter=',',lineterminator='\n')
 # 	j = getMatchups(20100917)
 # 	# print(j[0].csv())
@@ -123,7 +126,7 @@ for i in iterdates:
 
 
 # go through all dates and get matchups from the web
-######################################
+# #####################################
 import csv
 with open('matchups.csv', 'w', newline='') as f:
 	writer = csv.writer(f, delimiter=',',lineterminator='\n')
