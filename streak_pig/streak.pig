@@ -13,11 +13,19 @@ choi = load 'choices.csv' using PigStorage(',') as (time:chararray, sport:charar
 
 choices = FOREACH choi GENERATE ToDate(time, 'y-M-d H:m:s') AS time, sport, question, choice, winner, score, percent, percentactive;
 
-percent_bins = foreach choices generate time, sport, question, choice, winner, score, FLOOR(percent) AS percent, percentactive;
+--VARIABLES
+
+
+--PERCENT PREDICTED
+percent_bins = foreach choices generate time, sport, question, choice, winner, score, FLOOR(percent/5) AS percent, percentactive;
 percents = group percent_bins by percent;
 
-percent_accuracy = foreach percents generate group AS percent, AVG(percent_bins.winner) AS accuracy;
+percent_accuracy = foreach percents generate group*5 AS percent, AVG(percent_bins.winner) AS accuracy;
 store percent_accuracy into 'percent_accuracy';
+
+
+
+--SPECIFIC SPORTS
 
 nfl = filter percent_bins by sport == 'NFL';
 nfl_bins = group nfl by percent;
@@ -63,3 +71,32 @@ golf = filter percent_bins by sport == 'Golf';
 golf_bins = group golf by percent;
 golf_accuracy = foreach golf_bins generate group AS percent, AVG(golf.winner) AS accuracy;
 store golf_accuracy into 'golf_accuracy';
+
+
+-- PERCENT ACTIVE
+
+active_bins = foreach choices generate time, sport, question, choice, winner, score, FLOOR(percent/5) as percent, FLOOR(percentactive/5) as percentactive;
+actives = group active_bins by (percentactive, percent);
+
+active_accuracy = foreach actives generate group.percent*5 AS percent, group.percentactive*5 AS percentactive, AVG(active_bins.winner) AS accuracy;
+store active_accuracy into 'active_accuracy';
+
+
+--TIME
+time_bins = foreach choices generate time, GetHour(time) as hour, sport, question, choice, winner, score, FLOOR(percent/5) as percent, percentactive;
+times = group time_bins by (hour, percent);
+
+time_accuracy = foreach times generate group.hour AS hour, group.percent*5 as percent, AVG(time_bins.winner) AS accuracy;
+store time_accuracy into 'time_accuracy';
+
+
+--MATCHUP TYPE
+
+--need to find matchup keywords so we can sort by them
+
+
+
+
+
+
+
